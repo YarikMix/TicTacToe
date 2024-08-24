@@ -1,5 +1,7 @@
 import {MutableRefObject, useEffect, useRef} from "react";
 import io, {Socket} from 'socket.io-client'
+import Game from "./Game";
+import "./index.css"
 
 const SERVER_PORT = 3001
 const SERVER_URL = 'http://localhost:' + SERVER_PORT
@@ -10,14 +12,11 @@ function App() {
 
 	useEffect(() => {
 		socketRef.current = io(SERVER_URL)
-		console.log("AAAAAAA")
-		setTimeout(() => socketRef.current?.emit("message", {data: "hello"}), 1000)
+		socketRef.current?.emit("message", {data: "hello"})
 	}, []);
 
 	return (
-		<>
-
-		</>
+		<Game />
 	)
 }
 
