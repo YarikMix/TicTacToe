@@ -17,20 +17,23 @@ const io = new Server(server, {
 	}
 })
 
-const  enum GameStateEnum {
+const enum GameStateEnum {
 	NotStarted,
 	WaitingForOtherPlayerConnection,
-	Ended
+	WaitingForOtherPlayerMove,
+	WaitingForMove,
+	Ended,
+	Draw
 }
 
 interface Player {
 	id: string,
-	username: string
+	username: string,
+	item?: "X" | "O" | null
 }
 
 interface GameState {
-	currentMove: number
-	history: Array<Array<string | null>>
+	squares: Array<string | null>
 	players: Player[]
 	goes: Player | null
 	winner: string | null
@@ -38,8 +41,7 @@ interface GameState {
 }
 
 const gameState:GameState = {
-	currentMove: 0,
-	history: [Array(9).fill(null)],
+	squares: Array(9).fill(null),
 	players: [],
 	winner: null,
 	goes: null,
@@ -50,25 +52,45 @@ function randomElement<T>(array:T[]):T {
 	return array[Math.floor(Math.random() * array.length)]
 }
 
-io.on("connection", (socket:Socket) => {
-	console.log("User Connected")
-	console.log(socket.id)
-	console.log(socket.handshake.query.username)
+function count<T>(array:T[],item:T):number{
+	return array.filter(x => x == item).length
+}
 
+function calculateWinner(squares:Array<string | null>) {
+	const lines = [
+		[0, 1, 2],
+		[3, 4, 5],
+		[6, 7, 8],
+		[0, 3, 6],
+		[1, 4, 7],
+		[2, 5, 8],
+		[0, 4, 8],
+		[2, 4, 6],
+	];
+
+	for (let i = 0; i < lines.length; i++) {
+		const [a, b, c] = lines[i];
+		if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+			return gameState.players.find(player => player.item == squares[a])?.username;
+		}
+	}
+
+	return null;
+}
+
+io.on("connection", (socket:Socket) => {
 	gameState.players.push({
 		id: socket.id,
 		username: socket.handshake.query.username as string
 	})
 
-	gameState.goes = randomElement(gameState.players)
-
-	console.log(gameState)
-
 	if (gameState.players.length > 1) {
-		console.log("Game has been started")
+		gameState.goes = randomElement(gameState.players);
+		(gameState.players.find(player => player.id == gameState.goes?.id) as Player).item = "X";
+		(gameState.players.find(player => player.id != gameState.goes?.id) as Player).item = "O";
+
 		io.sockets.emit('game_start', {
-			currentMove: gameState.currentMove,
-			history: gameState.history,
+			squares: gameState.squares,
 			players: gameState.players,
 			goes: gameState.goes
 		});
@@ -79,22 +101,36 @@ io.on("connection", (socket:Socket) => {
 	});
 
 	socket.on("move", async (data) => {
-		console.log("move");
-		console.log("username", gameState.players.find(player => player.id == socket.id));
-		console.log("data", data);
-		console.log("nextHistory", data.nextHistory);
-
 		gameState.goes = gameState.players.find(player => player.id != socket.id) as Player;
-		gameState.history = data.nextHistory
-		gameState.currentMove = data.nextHistory.length - 1
+		gameState.squares = data.nextSquares
+
+		const winner = calculateWinner(data.nextSquares);
+		if (winner) {
+			gameState.winner = winner
+			gameState.game_state = GameStateEnum.Ended
+		} else if (!winner && !count(data.nextSquares, null)) {
+			gameState.game_state = GameStateEnum.Draw
+		}
 
 		io.sockets.emit('update_board', {
 			goes: gameState.goes,
-			history: gameState.history,
-			currentMove: gameState.currentMove
+			squares: gameState.squares,
+			game_state: gameState.game_state,
+			winner: gameState.winner
 		});
-
 	});
+
+	socket.on("restart", async () => {
+		gameState.goes = gameState.players.find(player => player.id == socket.id) as Player;
+		gameState.winner = null
+		gameState.game_state = GameStateEnum.NotStarted
+
+		io.sockets.emit('game_start', {
+			goes: gameState.goes,
+			squares: Array(9).fill(null),
+			players: gameState.players
+		});
+	})
 })
 
 

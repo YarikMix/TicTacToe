@@ -1,12 +1,11 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit"
 
 export interface GameState {
-	currentMove?: number
-	history?: Array<Array<string | null>>
+	goes?: string | null
+	squares?: Array<string | null>
 	opponent?: string | null
 	username?: string | null
 	item?: "X" | "O" | null
-	room_id?: string | null
 	winner?: string | null
 	game_state?: GameStateEnum
 }
@@ -16,16 +15,16 @@ export const enum GameStateEnum {
 	WaitingForOtherPlayerConnection,
 	WaitingForOtherPlayerMove,
 	WaitingForMove,
-	Ended
+	Ended,
+	Draw
 }
 
 const initialState:GameState = {
-	currentMove: 0,
-	history: [Array(9).fill(null)],
+	goes: null,
+	squares: Array(9).fill(null),
 	opponent: null,
 	username: null,
 	item: null,
-	room_id: null,
 	winner: null,
 	game_state: GameStateEnum.NotStarted
 }
@@ -42,13 +41,7 @@ const gameSlice = createSlice({
 				state.username = action.payload.username
 			}
 
-			if (action.payload.room_id) {
-				state.room_id = action.payload.room_id
-			}
-
-			if (action.payload.winner) {
-				state.winner = action.payload.winner
-			}
+			state.winner = action.payload.winner
 
 			if (action.payload.item) {
 				state.item = action.payload.item
@@ -62,12 +55,12 @@ const gameSlice = createSlice({
 				state.opponent = action.payload.opponent
 			}
 
-			if (action.payload.history) {
-				state.history = action.payload.history
+			if (action.payload.squares) {
+				state.squares = action.payload.squares
 			}
 
-			if (action.payload.currentMove) {
-				state.currentMove = action.payload.currentMove
+			if (action.payload.goes) {
+				state.goes = action.payload.goes
 			}
 		}
 	}

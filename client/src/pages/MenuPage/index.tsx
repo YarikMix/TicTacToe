@@ -16,12 +16,14 @@ function MenuPage() {
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault()
 
-		dispatch(updateGameState({
-			username: value,
-			game_state: GameStateEnum.WaitingForOtherPlayerConnection
-		}))
+		if (value) {
+			dispatch(updateGameState({
+				username: value,
+				game_state: GameStateEnum.WaitingForOtherPlayerConnection
+			}))
 
-		navigate("/game")
+			navigate("/game")
+		}
 	}
 
 	return (
