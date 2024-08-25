@@ -1,0 +1,27 @@
+.board
+	display: grid
+	grid-template-columns: repeat(3, 100px)
+	grid-gap: 5px
+	background-color: #444
+	padding: 5px
+	margin: 20px auto
+	border-radius: 10px
+
+.blocked
+	.cell
+		cursor: not-allowed
+
+.cell
+	width: 100px
+	height: 100px
+	background-color: #ccc
+	display: flex
+	justify-content: center
+	align-items: center
+	font-size: 2em
+	cursor: pointer
+
+.result
+	font-size: 1.5em
+	margin-bottom: 20px
+

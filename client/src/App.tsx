@@ -1,22 +1,21 @@
-import {MutableRefObject, useEffect, useRef} from "react";
-import io, {Socket} from 'socket.io-client'
-import Game from "./Game";
-import "./index.css"
-
-const SERVER_PORT = 3001
-const SERVER_URL = 'http://localhost:' + SERVER_PORT
+import Index from "pages/GamePage";
+import "./index.sass"
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import MenuPage from "pages/MenuPage";
+import {Provider} from "react-redux";
+import store from "src/store";
 
 function App() {
 
-	const socketRef:MutableRefObject<Socket | null> = useRef(null)
-
-	useEffect(() => {
-		socketRef.current = io(SERVER_URL)
-		socketRef.current?.emit("message", {data: "hello"})
-	}, []);
-
 	return (
-		<Game />
+		<Provider store={store}>
+			<BrowserRouter>
+				<Routes>
+					<Route path="/" element={<MenuPage />} />
+					<Route path="/game" element={<Index />} />
+				</Routes>
+			</BrowserRouter>
+		</Provider>
 	)
 }
 

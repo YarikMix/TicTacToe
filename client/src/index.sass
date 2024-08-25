@@ -1,0 +1,72 @@
+*,
+*::before,
+*::after
+	box-sizing: border-box
+
+/* Убираем внутренние отступы */
+ul[class],
+ol[class]
+	padding: 0
+/* Убираем внешние отступы */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+pre,
+ul[class],
+ol[class],
+li,
+figure,
+figcaption,
+blockquote,
+dl,
+dd
+	margin: 0
+	font-family: Roboto
+
+/* Выставляем основные настройки по-умолчанию для body */
+body
+	min-height: 100vh
+	scroll-behavior: smooth
+	line-height: 1.5
+
+/* Удаляем стандартную стилизацию для всех ul и il, у которых есть атрибут class*/
+ul[class],
+ol[class]
+	list-style: none
+
+/* Элементы a, у которых нет класса, сбрасываем до дефолтных стилей */
+a:not([class])
+	text-decoration-skip-ink: auto
+
+/* Упрощаем работу с изображениями */
+img
+	max-width: 100%
+	display: block
+
+/* Указываем понятную периодичность в потоке данных у article*/
+article > * + *
+	margin-top: 1em
+
+/* Наследуем шрифты для инпутов и кнопок */
+input,
+button,
+textarea,
+select
+	font: inherit
+
+p,
+span
+	font-family: inherit
+
+body
+	font-family: Arial, sans-serif
+	text-align: center
+	background: linear-gradient(to bottom right, #e66465, #9198e5)
+	margin: 0
+	height: 100vh
+	display: flex
+	align-items: center
+	justify-content: center
