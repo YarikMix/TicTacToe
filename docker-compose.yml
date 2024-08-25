@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+   frontend:
+     build: ./client
+     container_name: client
+     ports:
+       - "3000:3000"
+
+   ws-server:
+     container_name: ws-server
+     build: ./server
+     ports:
+       - "3001:3001"

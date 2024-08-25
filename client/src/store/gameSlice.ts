@@ -34,9 +34,6 @@ const gameSlice = createSlice({
 	initialState: initialState,
 	reducers: {
 		updateGameState: (state, action:PayloadAction<GameState>) => {
-			console.log("updateGameState")
-			console.log(action.payload)
-
 			if (action.payload.username) {
 				state.username = action.payload.username
 			}

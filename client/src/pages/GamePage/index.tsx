@@ -67,11 +67,11 @@ export default function GamePage() {
     function restartGame() {
 		socketRef.current?.emit("restart", {
 			goes: username
-		} as any)
+		} as never)
     }
 
 	function handleClick(i) {
-		if (game_state === GameStateEnum.WaitingForOtherPlayerMove || game_state === GameStateEnum.Ended || squares[i]) {
+		if (game_state === GameStateEnum.WaitingForOtherPlayerMove || game_state === GameStateEnum.Ended || game_state === GameStateEnum.Draw || squares[i]) {
 			return;
 		}
 
@@ -81,7 +81,7 @@ export default function GamePage() {
 
 		socketRef.current?.emit("move", {
 			nextSquares: nextSquares
-		} as any)
+		} as never)
 	}
 
 	if (game_state == GameStateEnum.WaitingForOtherPlayerConnection)
