@@ -26,9 +26,9 @@
 
 ### Стэк технологий
 
-Фронтенд: React, Redux Toolkit, MUI, Socket.IO
-Бэкенд: Node.js, Socket.IO
-Другие используемые технологии: Docker
+* Фронтенд: React, Redux Toolkit, MUI, Socket.IO
+* Бэкенд: Node.js, Socket.IO
+* Другие технологии: Docker
 
 ### Техническая часть
 
