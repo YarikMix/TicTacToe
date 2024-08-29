@@ -1,11 +1,10 @@
-import {Socket} from "socket.io";
+import {Socket, Server} from "socket.io";
+import http from "http"
+import cors from "cors"
+import {GameState, GameStateEnum, Player} from "./types";
 
 const express = require("express");
 const app = express()
-const http = require("http");
-const {} = require("socket.io")
-const {Server} = require("socket.io")
-const cors = require("cors")
 
 app.use(cors())
 
@@ -16,29 +15,6 @@ const io = new Server(server, {
 		origin: "*"
 	}
 })
-
-const enum GameStateEnum {
-	NotStarted,
-	WaitingForOtherPlayerConnection,
-	WaitingForOtherPlayerMove,
-	WaitingForMove,
-	Ended,
-	Draw
-}
-
-interface Player {
-	id: string,
-	username: string,
-	item?: "X" | "O" | null
-}
-
-interface GameState {
-	squares: Array<string | null>
-	players: Player[]
-	goes: Player | null
-	winner: string | null
-	game_state: GameStateEnum
-}
 
 const gameState:GameState = {
 	squares: Array(9).fill(null),
@@ -127,7 +103,7 @@ io.on("connection", (socket:Socket) => {
 
 		io.sockets.emit('game_start', {
 			goes: gameState.goes,
-			squares: Array(9).fill(null),
+			squares: Array.from({length: 9}),
 			players: gameState.players
 		});
 	})

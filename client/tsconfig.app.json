@@ -31,7 +31,10 @@
       "modules/*": ["modules/*"],
       "utils/*": ["utils/*"],
       "hooks/*": ["hooks/*"]
-    }
+    },
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

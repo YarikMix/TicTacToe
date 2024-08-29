@@ -1,15 +1,15 @@
 import {Button, TextField, Typography} from "@mui/material";
-import {FormEvent, useState} from "react";
+import {FormEvent, useContext, useState} from "react";
 import s from "./style.module.sass"
 import {useNavigate} from "react-router-dom";
-import {useDispatch} from "react-redux";
-import {GameStateEnum, updateGameState} from "store/gameSlice.ts";
+import {ThemeContext} from "src/App.tsx";
+import {GameStateEnum} from "utils/types.ts";
 
 function MenuPage() {
 
 	const navigate = useNavigate()
 
-	const dispatch = useDispatch()
+	const {setGameState} = useContext(ThemeContext);
 
 	const [value, setValue] =  useState('')
 
@@ -17,7 +17,8 @@ function MenuPage() {
 		e.preventDefault()
 
 		if (value) {
-			dispatch(updateGameState({
+			setGameState((oldGameState) => ({
+				...oldGameState,
 				username: value,
 				game_state: GameStateEnum.WaitingForOtherPlayerConnection
 			}))

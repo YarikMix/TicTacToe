@@ -1,21 +1,16 @@
-import {MutableRefObject, useEffect, useRef} from 'react';
+import {MutableRefObject, useContext, useEffect, useRef} from 'react';
 import styles from "./style.module.sass"
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "store/store.ts";
-import {GameStateEnum, updateGameState} from "store/gameSlice.ts";
 import io, {Socket} from "socket.io-client";
 import {useNavigate} from "react-router-dom";
 import {Button} from "@mui/material";
 import Square from "components/Square";
-
-const SERVER_PORT = 3001
-const SERVER_URL = 'http://localhost:' + SERVER_PORT
+import {emptySquares, SERVER_URL} from "utils/const.ts";
+import {ThemeContext} from "src/App.tsx";
+import {GameStateEnum} from "utils/types.ts";
 
 export default function GamePage() {
 
-	const {username, game_state, item, squares, winner, opponent} = useSelector((state:RootState) => state.game)
-
-	const dispatch = useDispatch()
+	const {gameState, setGameState} = useContext(ThemeContext);
 
 	const navigate = useNavigate()
 
@@ -23,68 +18,71 @@ export default function GamePage() {
 
 	useEffect(() => {
 
-		if (game_state == GameStateEnum.NotStarted) {
+		if (gameState.game_state == GameStateEnum.NotStarted) {
 			navigate("/")
 		}
 
 		const myUrlWithParams = new URL(SERVER_URL);
-		myUrlWithParams.searchParams.append("username", username);
+		myUrlWithParams.searchParams.append("username", gameState.username);
 		socketRef.current = io(myUrlWithParams.href)
 
 		socketRef.current?.on("game_start", (data) => {
-			dispatch(updateGameState({
-				squares: Array(9).fill(null),
-				opponent: data.players.find(player => player.username != username).username,
-				game_state: data.goes.username == username ? GameStateEnum.WaitingForMove : GameStateEnum.WaitingForOtherPlayerMove,
-				item: data.goes.username == username ? "X" : "O",
+			setGameState((oldState) => ({
+				...oldState,
+				squares: emptySquares,
+				opponent: data.players.find(player => player.username != gameState.username).username,
+				game_state: data.goes.username == oldState.username ? GameStateEnum.WaitingForMove : GameStateEnum.WaitingForOtherPlayerMove,
+				item: data.goes.username == oldState.username ? "X" : "O",
 				goes: data.goes.username,
 				winner: null
 			}))
 		})
 
 		socketRef.current?.on("update_board", (data) => {
-			let newGameState
-			if (data.game_state == GameStateEnum.Ended || data.game_state == GameStateEnum.Draw) {
-				newGameState = data.game_state
-			} else {
-				newGameState = data.goes.username == username ? GameStateEnum.WaitingForMove : GameStateEnum.WaitingForOtherPlayerMove
-			}
+			setGameState((oldState) => {
+				let newGameState
+				if (data.game_state == GameStateEnum.Ended || data.game_state == GameStateEnum.Draw) {
+					newGameState = data.game_state
+				} else {
+					newGameState = data.goes.username == oldState.username ? GameStateEnum.WaitingForMove : GameStateEnum.WaitingForOtherPlayerMove
+				}
 
-			dispatch(updateGameState({
-				squares: data.squares,
-				game_state: newGameState,
-				winner: data.winner,
-				goes: data.goes.username
-			}))
+				return {
+					...oldState,
+					squares: data.squares,
+					game_state: newGameState,
+					winner: data.winner,
+					goes: data.goes.username
+				}
+			})
 		})
 
 		return () => {
 			socketRef.current?.disconnect()
 		}
-
 	}, []);
 
     function restartGame() {
 		socketRef.current?.emit("restart", {
-			goes: username
+			goes: gameState.username
 		} as never)
     }
 
 	function handleClick(i) {
-		if (game_state === GameStateEnum.WaitingForOtherPlayerMove || game_state === GameStateEnum.Ended || game_state === GameStateEnum.Draw || squares[i]) {
+		if (gameState.game_state === GameStateEnum.WaitingForOtherPlayerMove || gameState.game_state === GameStateEnum.Ended || gameState.game_state === GameStateEnum.Draw || gameState.squares[i]) {
 			return;
 		}
 
-		const nextSquares = [...squares];
+		const nextSquares = [...gameState.squares];
 
-		nextSquares[i] = item
+		nextSquares[i] = gameState.item
 
 		socketRef.current?.emit("move", {
 			nextSquares: nextSquares
 		} as never)
 	}
 
-	if (game_state == GameStateEnum.WaitingForOtherPlayerConnection)
+	if (gameState.game_state == GameStateEnum.WaitingForOtherPlayerConnection)
 	{
 		return (
 			<div className={styles.root}>
@@ -94,26 +92,27 @@ export default function GamePage() {
 	}
 
 	let status;
-	if (game_state == GameStateEnum.Ended) {
-		status = 'Победитель: ' + winner;
-	} else if (game_state === GameStateEnum.Draw) {
+	if (gameState.game_state == GameStateEnum.Ended) {
+		status = 'Победитель: ' + gameState.winner;
+	} else if (gameState.game_state === GameStateEnum.Draw) {
 		status = "Ничья";
 	} else {
-		status = game_state == GameStateEnum.WaitingForMove ? "Ваш ход" : 'Ход соперника';
+		status = gameState.game_state == GameStateEnum.WaitingForMove ? "Ваш ход" : 'Ход соперника';
 	}
 
-	const isBlocked = game_state === GameStateEnum.WaitingForOtherPlayerMove ||
-		game_state === GameStateEnum.Ended || game_state === GameStateEnum.Draw
+	const isBlocked = gameState.game_state === GameStateEnum.WaitingForOtherPlayerMove ||
+		gameState.game_state === GameStateEnum.Ended || gameState.game_state === GameStateEnum.Draw
 
-	const items = Array.from(Array(squares.length).keys()).map(i => <Square value={squares[i]} isBlocked={isBlocked} onSquareClick={() => handleClick(i)} />)
+	const items = Array.from(Array(9).keys()).map(i => <Square value={gameState.squares[i]} isBlocked={isBlocked} onSquareClick={() => handleClick(i)} key={i} />)
 
-	const isEnded = game_state == GameStateEnum.Ended || game_state === GameStateEnum.Draw
+	const isEnded = gameState.game_state == GameStateEnum.Ended || gameState.game_state === GameStateEnum.Draw
+
 
 	return (
 		<div className={styles.root}>
-			<div>Вы: {username}</div>
-			<div>Вы играете за <b>{item == "X" ? "Крестики" : "Нолики"}</b></div>
-			<div>Ваш соперник: {opponent}</div>
+			<div>Вы: {gameState.username}</div>
+			<div>Вы играете за <b>{gameState.item == "X" ? "Крестики" : "Нолики"}</b></div>
+			<div>Ваш соперник: {gameState.opponent}</div>
 			<div>{status}</div>
 			<div className={styles.board}>
 				{items}
