@@ -3,8 +3,8 @@ import "./index.sass"
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import MenuPage from "pages/MenuPage";
 import React, {createContext, useState} from "react";
-import {emptySquares} from "utils/const.ts";
 import {GameStateEnum} from "utils/types.ts";
+import {emptySquares} from "consts/consts.ts";
 
 interface ThemeContextValue {
 	gameState: GameState;

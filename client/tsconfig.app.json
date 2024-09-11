@@ -30,7 +30,8 @@
       "styles/*": ["styles/*"],
       "modules/*": ["modules/*"],
       "utils/*": ["utils/*"],
-      "hooks/*": ["hooks/*"]
+      "hooks/*": ["hooks/*"],
+      "consts/*": ["../../server/consts/*"]
     },
     "allowSyntheticDefaultImports": true
   },

@@ -2,6 +2,7 @@ import {Socket, Server} from "socket.io";
 import http from "http"
 import cors from "cors"
 import {GameState, GameStateEnum, Player} from "./types";
+import {SERVER_PORT} from "./consts/consts";
 
 const express = require("express");
 const app = express()
@@ -110,6 +111,6 @@ io.on("connection", (socket:Socket) => {
 })
 
 
-server.listen(3001, () => {
+server.listen(SERVER_PORT, () => {
 	console.log("SERVER IS RUNNING")
 })

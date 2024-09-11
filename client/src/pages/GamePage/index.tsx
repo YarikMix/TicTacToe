@@ -4,9 +4,9 @@ import io, {Socket} from "socket.io-client";
 import {useNavigate} from "react-router-dom";
 import {Button} from "@mui/material";
 import Square from "components/Square";
-import {emptySquares, SERVER_URL} from "utils/const.ts";
 import {ThemeContext} from "src/App.tsx";
 import {GameStateEnum} from "utils/types.ts";
+import {emptySquares, SERVER_URL} from "consts/consts.ts";
 
 export default function GamePage() {
 
