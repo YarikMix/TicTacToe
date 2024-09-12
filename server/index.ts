@@ -2,7 +2,7 @@ import {Socket, Server} from "socket.io";
 import http from "http"
 import cors from "cors"
 import {GameState, GameStateEnum, Player} from "./types";
-import {SERVER_PORT} from "./consts/consts";
+import {emptySquares, SERVER_PORT} from "./consts/consts";
 
 const express = require("express");
 const app = express()
@@ -18,7 +18,7 @@ const io = new Server(server, {
 })
 
 const gameState:GameState = {
-	squares: Array(9).fill(null),
+	squares: emptySquares,
 	players: [],
 	winner: null,
 	goes: null,
@@ -104,7 +104,7 @@ io.on("connection", (socket:Socket) => {
 
 		io.sockets.emit('game_start', {
 			goes: gameState.goes,
-			squares: Array.from({length: 9}),
+			squares: emptySquares,
 			players: gameState.players
 		});
 	})
